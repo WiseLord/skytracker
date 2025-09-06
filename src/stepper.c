@@ -4,9 +4,12 @@
 #include "timers.h"
 #include "utils.h"
 
+#define ABS(x) ((x >= 0) ? (x) : (-x))
+
 static Stepper stepper = {
     .hold = false,
     .track = false,
+    .speed = 1,
 };
 
 void stepperAdd(int32_t value)
@@ -56,10 +59,14 @@ void stepperInit()
     SET(EN);
 
     // Step period => 100us
-    timerInit(TIM_STEP, 99, 71); // 72MHz / 100 / 72 = 10kHz
+    timerInit(TIM_STEP, 99, 65535);
 
     // Track period 280482us
     timerInit(TIM_TRACK, 46638, 432); // 72MHz / 46639 / 433 = 3.565294 Hz
+
+    stepperHold(true);
+    // stepperAdd(64 * 200 * 5);
+    stepperAdd(64);
 }
 
 Stepper *stepperGet()
@@ -106,6 +113,27 @@ void TIM_STEP_HANDLER(void)
         SET(STEP);
         utiluDelay(1);
         CLR(STEP);
+
+        // Speed change direction
+        if (stepper.speed > ABS(stepper.queue)) {
+            stepper.speed--;
+        } else {
+            stepper.speed++;
+        }
+        // Max speed limit
+        if (stepper.speed > 2000) {
+            stepper.speed = 2000;
+        }
+        // Min speed limit
+        if (stepper.speed < 1) {
+            stepper.speed = 1;
+        }
+
+        int32_t reload = 200000 / stepper.speed;
+        if (reload > 65535) {
+            reload = 65535;
+        }
+        LL_TIM_SetAutoReload(TIM_STEP, (uint32_t)reload);
     }
 }
 

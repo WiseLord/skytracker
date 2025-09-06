@@ -21,6 +21,7 @@
 typedef struct {
     int32_t queue;
     int32_t step;
+    int32_t speed;
     bool hold;
     bool track;
 } Stepper;

@@ -245,6 +245,10 @@ void appShow()
 
         glcdSetXY(0, 100);
         glcdWriteString("Очередь: ");
+
+        glcdSetXY(0, 125);
+        glcdWriteString("Скорость: ");
+
         app.clear = false;
     }
 
@@ -269,6 +273,12 @@ void appShow()
     snprintf(buf, sizeof(buf), "%8" PRId32, s->queue);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w, 100);
+    glcdSetFontAlign(GLCD_ALIGN_RIGHT);
+    glcdWriteString(buf);
+
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->speed);
+    glcdSetFont(&fontterminus22b);
+    glcdSetXY(r.w, 125);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 }
