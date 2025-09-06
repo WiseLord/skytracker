@@ -26,7 +26,7 @@ static void inputHandleButtons(uint16_t btnNow)
             if (btnCnt == LONG_PRESS) {
                 input.btn = btnPrev;
                 input.flags |= BTN_FLAG_LONG_PRESS;
-                if (btnNow & (BTN_D4 | BTN_D5 | ENC_A | ENC_B)) {
+                if (btnNow & (ENC_A | ENC_B)) {
                     btnCnt -= AUTOREPEAT;
                 }
             }

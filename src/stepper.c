@@ -4,7 +4,13 @@
 #include "timers.h"
 #include "utils.h"
 
-#define ABS(x) ((x >= 0) ? (x) : (-x))
+#define ABS(x)          ((x) >= 0 ? (x) : (-x))
+#define MAX(x, y)       ((x) > (y) ? (x) : (y))
+#define MIN(x, y)       ((x) < (y) ? (x) : (y))
+
+#define RELOAD_MAX          65535
+#define SPEED_MAX           2000
+#define USTEPS_PER_SEC_MAX  100
 
 static Stepper stepper = {
     .hold = false,
@@ -63,10 +69,6 @@ void stepperInit()
 
     // Track period 280482us
     timerInit(TIM_TRACK, 46638, 432); // 72MHz / 46639 / 433 = 3.565294 Hz
-
-    stepperHold(true);
-    // stepperAdd(64 * 200 * 5);
-    stepperAdd(64);
 }
 
 Stepper *stepperGet()
@@ -87,53 +89,77 @@ void TIM_TRACK_HANDLER(void)
     }
 }
 
-void TIM_STEP_HANDLER(void)
-{
-    if (LL_TIM_IsActiveFlag_UPDATE(TIM_STEP)) {
-        // Clear the update interrupt flag
-        LL_TIM_ClearFlag_UPDATE(TIM_STEP);
-
-        // Skip if no action required
-        if (!stepper.hold || stepper.queue == 0) {
-            return;
-        }
-
-        // Select direction
-        if (stepper.queue > 0) {
+__attribute__((always_inline))
+static inline void doStep(int32_t speed) {
+    if (speed) {
+        if (speed > 0) {
+            SET(DIR);
             stepper.queue--;
             stepper.step++;
-            SET(DIR);
-        } else {
+        }
+        if (speed < 0) {
+            CLR(DIR);
             stepper.queue++;
             stepper.step--;
-            CLR(DIR);
         }
-
         // Do one step
         SET(STEP);
         utiluDelay(1);
         CLR(STEP);
+    }
 
-        // Speed change direction
-        if (stepper.speed > ABS(stepper.queue)) {
-            stepper.speed--;
-        } else {
-            stepper.speed++;
+    int32_t reload = RELOAD_MAX;
+    if (speed) {
+        reload = 200000 / ABS(speed);
+    }
+    if (reload > RELOAD_MAX) {
+        reload = RELOAD_MAX;
+    }
+    LL_TIM_SetAutoReload(TIM_STEP, (uint32_t)reload);
+}
+
+void TIM_STEP_HANDLER(void)
+{
+    // int32_t direction = 0;
+
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM_STEP)) {
+        // Clear the update interrupt flag
+        LL_TIM_ClearFlag_UPDATE(TIM_STEP);
+
+        // Skip if motor not active
+        if (!stepper.hold) {
+            return;
         }
+
+        if (stepper.queue == 0) {
+            if (stepper.speed <= 1 && stepper.speed >= -1) {
+                stepper.speed = 0;
+            }
+        }
+        if (stepper.queue > 0) {
+            if (stepper.speed > stepper.queue) {
+                stepper.speed--;
+            } else {
+                stepper.speed++;
+            }
+        }
+        if (stepper.queue < 0) {
+            if (stepper.speed < stepper.queue) {
+                stepper.speed++;
+            } else {
+                stepper.speed--;
+            }
+        }
+
         // Max speed limit
-        if (stepper.speed > 2000) {
-            stepper.speed = 2000;
+        if (stepper.speed > SPEED_MAX) {
+            stepper.speed = SPEED_MAX;
         }
-        // Min speed limit
-        if (stepper.speed < 1) {
-            stepper.speed = 1;
+        if (stepper.speed < -SPEED_MAX) {
+            stepper.speed = -SPEED_MAX;
         }
 
-        int32_t reload = 200000 / stepper.speed;
-        if (reload > 65535) {
-            reload = 65535;
-        }
-        LL_TIM_SetAutoReload(TIM_STEP, (uint32_t)reload);
+        doStep(stepper.speed);
     }
 }
 
