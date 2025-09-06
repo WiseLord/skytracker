@@ -18,6 +18,9 @@
 #define MS2_Port                GPIOA
 #define MS2_Pin                 LL_GPIO_PIN_6
 
+#define STEPS_PER_EVOLUTION     200
+#define MICROSTEPS              64
+
 typedef struct {
     int32_t target;
     int32_t position;

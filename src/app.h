@@ -2,8 +2,10 @@
 #define APP_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct {
+    int32_t step;
     bool backlight;
     bool clear;
 } App;

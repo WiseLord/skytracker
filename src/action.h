@@ -19,6 +19,7 @@ enum {
     ACTION_STEP_RESET,
     ACTION_TRACK,
     ACTION_SLOWDOWN,
+    ACTION_STEP_SIZE,
 
     ACTION_STANDBY,
     ACTION_BACKLIGHT,
@@ -28,7 +29,7 @@ enum {
 
 typedef struct {
     ActionType type;
-    int16_t value;
+    int32_t value;
 } Action;
 
 #ifdef __cplusplus
