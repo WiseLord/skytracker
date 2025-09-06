@@ -24,6 +24,7 @@ static Action action = {
 
 static App app = {
     .backlight = true,
+    .clear = true,
 };
 
 static void actionSet(ActionType type, int16_t value)
@@ -51,30 +52,6 @@ void appInit()
     utilmDelay(100);
     glcdSetBacklight(app.backlight);
 
-    glcdSetFontColor(COLOR_WHITE);
-    glcdSetFontBgColor(COLOR_BLACK);
-
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(160, 0);
-    glcdSetFontAlign(GLCD_ALIGN_CENTER);
-    glcdWriteString("Экваториальная монтировка");
-    glcdDrawRect(0, 24, 320, 2, COLOR_WHITE);
-
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(0, 28);
-    glcdWriteString("Двигатель: ");
-
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(0, 52);
-    glcdWriteString("Слежение: ");
-
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(0, 76);
-    glcdWriteString("Позиция: ");
-
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(0, 100);
-    glcdWriteString("Очередь: ");
 }
 
 void appRun()
@@ -239,30 +216,58 @@ void appActionHandle(void)
 
 void appShow()
 {
-    char buf[32];
     Stepper *s = stepperGet();
     GlcdRect r = glcdGet()->rect;
 
+    glcdSetFontColor(COLOR_WHITE);
+    glcdSetFontBgColor(COLOR_BLACK);
+
+    char buf[32];
+
+    if (app.clear) {
+        glcdDrawRect(10, 24, 300, 1, COLOR_WHITE);
+
+        glcdSetFont(&fontterminus24b);
+        glcdSetXY(160, 0);
+        glcdSetFontAlign(GLCD_ALIGN_CENTER);
+        glcdWriteString("Экваториальная монтировка");
+
+        glcdSetFont(&fontterminus22b);
+
+        glcdSetXY(0, 25);
+        glcdWriteString("Двигатель: ");
+
+        glcdSetXY(0, 50);
+        glcdWriteString("Слежение: ");
+
+        glcdSetXY(0, 75);
+        glcdWriteString("Позиция: ");
+
+        glcdSetXY(0, 100);
+        glcdWriteString("Очередь: ");
+        app.clear = false;
+    }
+
     snprintf(buf, sizeof(buf), "%s", s->hold ? "  вкл" : "  откл");
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(r.w, 28);
+    glcdSetFont(&fontterminus22b);
+    glcdSetXY(r.w, 25);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     snprintf(buf, sizeof(buf), "%s", s->track ? "  вкл" : "  откл");
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(r.w, 52);
+    glcdSetFont(&fontterminus22b);
+    glcdSetXY(r.w, 50);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     snprintf(buf, sizeof(buf), "%8" PRId32, s->step);
-    glcdSetFont(&fontterminus24b);
-    glcdSetXY(r.w, 76);
+    glcdSetFont(&fontterminus22b);
+    glcdSetXY(r.w, 75);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     snprintf(buf, sizeof(buf), "%8" PRId32, s->queue);
-    glcdSetFont(&fontterminus24b);
+    glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w, 100);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);

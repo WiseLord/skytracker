@@ -5,6 +5,7 @@
 
 typedef struct {
     bool backlight;
+    bool clear;
 } App;
 
 void appInit(void);
