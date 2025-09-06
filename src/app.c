@@ -108,6 +108,7 @@ static void actionRemapBtnShort(void)
     case BTN_D2:
         break;
     case BTN_D3:
+        actionSet(ACTION_SLOWDOWN, FLAG_SWITCH);
         break;
     case BTN_D4:
         actionSet(ACTION_ROTATE, -1);
@@ -204,6 +205,9 @@ void appActionHandle(void)
     case ACTION_STEP_RESET:
         stepperReset();
         break;
+    case ACTION_SLOWDOWN:
+        stepperSlowDown(!s->slow);
+        break;
     case ACTION_BACKLIGHT:
         app.backlight = !app.backlight;
         glcdSetBacklight(app.backlight);
@@ -241,12 +245,15 @@ void appShow()
         glcdWriteString("Слежение: ");
 
         glcdSetXY(0, 75);
-        glcdWriteString("Позиция: ");
+        glcdWriteString("Цель: ");
 
         glcdSetXY(0, 100);
-        glcdWriteString("Очередь: ");
+        glcdWriteString("Позиция: ");
 
         glcdSetXY(0, 125);
+        glcdWriteString("Очередь: ");
+
+        glcdSetXY(0, 150);
         glcdWriteString("Скорость: ");
 
         app.clear = false;
@@ -264,21 +271,27 @@ void appShow()
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->step);
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->target);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w, 75);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->queue);
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->position);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w, 100);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->speed);
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->queue);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w, 125);
+    glcdSetFontAlign(GLCD_ALIGN_RIGHT);
+    glcdWriteString(buf);
+
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->speed);
+    glcdSetFont(&fontterminus22b);
+    glcdSetXY(r.w, 150);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 }

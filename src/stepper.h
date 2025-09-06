@@ -19,11 +19,13 @@
 #define MS2_Pin                 LL_GPIO_PIN_6
 
 typedef struct {
+    int32_t target;
+    int32_t position;
     int32_t queue;
-    int32_t step;
     int32_t speed;
     bool hold;
     bool track;
+    bool slow;
 } Stepper;
 
 void stepperInit();
@@ -34,5 +36,6 @@ void stepperAdd(int32_t value);
 void stepperReset(void);
 void stepperTrack(bool value);
 void stepperHold(bool value);
+void stepperSlowDown(bool value);
 
 #endif // STEPPER_H

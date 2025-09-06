@@ -15,11 +15,12 @@
 static Stepper stepper = {
     .hold = false,
     .track = false,
-    .speed = 1,
+    .speed = 0,
 };
 
 void stepperAdd(int32_t value)
 {   if (stepper.hold) {
+        stepper.target += value;
         stepper.queue += value;
     }
 }
@@ -84,7 +85,7 @@ void TIM_TRACK_HANDLER(void)
 
         // Callbacks
         if (stepper.hold && stepper.track) {
-            stepper.queue++;
+            stepperAdd(+1);
         }
     }
 }
@@ -95,12 +96,12 @@ static inline void doStep(int32_t speed) {
         if (speed > 0) {
             SET(DIR);
             stepper.queue--;
-            stepper.step++;
+            stepper.position++;
         }
         if (speed < 0) {
             CLR(DIR);
             stepper.queue++;
-            stepper.step--;
+            stepper.position--;
         }
         // Do one step
         SET(STEP);
@@ -137,14 +138,14 @@ void TIM_STEP_HANDLER(void)
             }
         }
         if (stepper.queue > 0) {
-            if (stepper.speed > stepper.queue) {
+            if (stepper.speed >= stepper.queue) {
                 stepper.speed--;
             } else {
                 stepper.speed++;
             }
         }
         if (stepper.queue < 0) {
-            if (stepper.speed < stepper.queue) {
+            if (stepper.speed <= stepper.queue) {
                 stepper.speed++;
             } else {
                 stepper.speed--;
@@ -177,10 +178,24 @@ void stepperHold(bool value)
     } else {
         SET(EN);
     }
+
+    stepperReset();
 }
 
 void stepperReset(void)
 {
-    stepper.step = 0;
+    stepper.target = 0;
+    stepper.position = 0;
     stepper.queue = 0;
+    stepper.speed = 0;
+}
+
+void stepperSlowDown(bool value)
+{
+    stepper.slow = value;
+    if (value) {
+        LL_TIM_SetPrescaler(TIM_STEP, 999);
+    } else {
+        LL_TIM_SetPrescaler(TIM_STEP, 99);
+    }
 }
