@@ -12,7 +12,13 @@
 #define SPEED_MAX           2000
 #define USTEPS_PER_SEC_MAX  100
 
+static const Divider dividers[DIVIDER_END] = {
+    [DIVIDER_STAR] = {46638, 432, " звёзды"},  // 72MHz / 46639 / 433 = 3.565294 Hz
+    [DIVIDER_MOON] = {8196, 2556, "   Луна"},
+};
+
 static Stepper stepper = {
+    .div = DIVIDER_STAR,
     .hold = false,
     .track = false,
     .speed = 0,
@@ -69,7 +75,7 @@ void stepperInit()
     timerInit(TIM_STEP, 99, 65535);
 
     // Track period 280482us
-    timerInit(TIM_TRACK, 46638, 432); // 72MHz / 46639 / 433 = 3.565294 Hz
+    stepperDivider(DIVIDER_STAR);
 }
 
 Stepper *stepperGet()
@@ -198,4 +204,23 @@ void stepperSlowDown(bool value)
     } else {
         LL_TIM_SetPrescaler(TIM_STEP, 99);
     }
+}
+
+void stepperDivider(DividerType div)
+{
+    if (div >= DIVIDER_END) {
+        div = DIVIDER_BEGIN;
+    }
+
+    stepper.div = div;
+
+    LL_TIM_DisableCounter(TIM_TRACK);
+    LL_TIM_SetCounter(TIM_TRACK, dividers[div].reload);
+
+    timerInit(TIM_TRACK, dividers[div].prescaler, dividers[div].reload);
+}
+
+const char *stepperDividerName(void)
+{
+    return dividers[stepper.div].name;
 }

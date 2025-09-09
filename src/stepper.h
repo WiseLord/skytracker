@@ -22,10 +22,27 @@
 #define MICROSTEPS              64
 
 typedef struct {
+    uint16_t prescaler;
+    uint16_t reload;
+    const char *name;
+} Divider;
+
+typedef uint8_t DividerType;
+enum {
+    DIVIDER_BEGIN = 0,
+
+    DIVIDER_STAR = DIVIDER_BEGIN,
+    DIVIDER_MOON,
+
+    DIVIDER_END
+};
+
+typedef struct {
     int32_t target;
     int32_t position;
     int32_t queue;
     int32_t speed;
+    int8_t div;
     bool hold;
     bool track;
     bool slow;
@@ -37,6 +54,8 @@ Stepper *stepperGet(void);
 
 void stepperAdd(int32_t value);
 void stepperReset(void);
+void stepperDivider(DividerType div);
+const char *stepperDividerName(void);
 void stepperTrack(bool value);
 void stepperHold(bool value);
 void stepperSlowDown(bool value);

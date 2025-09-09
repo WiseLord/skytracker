@@ -106,8 +106,6 @@ static void actionRemapBtnShort(void)
     case BTN_D1:
         actionSet(ACTION_TRACK, FLAG_SWITCH);
         break;
-    case BTN_D2:
-        break;
     case BTN_D3:
         actionSet(ACTION_STEP_SIZE, FLAG_SWITCH);
         break;
@@ -116,12 +114,6 @@ static void actionRemapBtnShort(void)
         break;
     case BTN_D5:
         actionSet(ACTION_ROTATE, +app.step);
-        break;
-    case ENC_A:
-        actionSet(ACTION_ENCODER, -1);
-        break;
-    case ENC_B:
-        actionSet(ACTION_ENCODER, +1);
         break;
     default:
         break;
@@ -135,22 +127,17 @@ static void actionRemapBtnLong(void)
         actionSet(ACTION_BACKLIGHT, FLAG_SWITCH);
         break;
     case BTN_D1:
-        actionSet(ACTION_STEP_RESET, 0);
-        break;
-    case BTN_D2:
+        actionSet(ACTION_DIVIDER, +1);
         break;
     case BTN_D3:
-        actionSet(ACTION_SLOWDOWN, FLAG_SWITCH);
+        actionSet(ACTION_STEP_RESET, 0);
+        // actionSet(ACTION_SLOWDOWN, FLAG_SWITCH);
         break;
     case BTN_D4:
         actionSet(ACTION_ROTATE, -STEPS_PER_EVOLUTION * MICROSTEPS);
         break;
     case BTN_D5:
         actionSet(ACTION_ROTATE, +STEPS_PER_EVOLUTION * MICROSTEPS);
-        break;
-    case ENC_A:
-        break;
-    case ENC_B:
         break;
     default:
         break;
@@ -207,6 +194,9 @@ void appActionHandle(void)
     case ACTION_STEP_RESET:
         stepperReset();
         break;
+    case ACTION_DIVIDER:
+        stepperDivider(s->div + 1);
+        break;
     case ACTION_SLOWDOWN:
         stepperSlowDown(!s->slow);
         break;
@@ -225,6 +215,8 @@ void appActionHandle(void)
         break;
     }
 }
+
+#include "hwlibs.h"
 
 void appShow()
 {
@@ -246,25 +238,28 @@ void appShow()
 
         glcdSetFont(&fontterminus22b);
 
-        glcdSetXY(1, 25);
+        glcdSetXY(1, 26);
         glcdWriteString("Питание двигателя ");
 
         glcdSetXY(1, 50);
         glcdWriteString("Режим слежения ");
 
-        glcdSetXY(1, 75);
+        glcdSetXY(1, 74);
+        glcdWriteString("Объект ");
+
+        glcdSetXY(1, 98);
         glcdWriteString("Размер шага ");
 
-        glcdSetXY(1, 100);
+        glcdSetXY(1, 122);
         glcdWriteString("Целевая позиция ");
 
-        glcdSetXY(1, 125);
+        glcdSetXY(1, 146);
         glcdWriteString("Текущая позиция ");
 
-        glcdSetXY(1, 150);
+        glcdSetXY(1, 170);
         glcdWriteString("Шагов в очереди ");
 
-        glcdSetXY(1, 175);
+        glcdSetXY(1, 194);
         glcdWriteString("Текущая скорость ");
 
         app.clear = false;
@@ -272,7 +267,7 @@ void appShow()
 
     snprintf(buf, sizeof(buf), "%s", s->hold ? "  вкл" : "  откл");
     glcdSetFont(&fontterminus22b);
-    glcdSetXY(r.w - 1, 25);
+    glcdSetXY(r.w - 1, 26);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
@@ -282,33 +277,39 @@ void appShow()
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
+    snprintf(buf, sizeof(buf), "%s", stepperDividerName());
+    glcdSetFont(&fontterminus22b);
+    glcdSetXY(r.w - 1, 74);
+    glcdSetFontAlign(GLCD_ALIGN_RIGHT);
+    glcdWriteString(buf);
+
     snprintf(buf, sizeof(buf), "%8" PRId32, app.step);
     glcdSetFont(&fontterminus22b);
-    glcdSetXY(r.w - 1, 75);
+    glcdSetXY(r.w - 1, 98);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     snprintf(buf, sizeof(buf), "%8" PRId32, s->target);
     glcdSetFont(&fontterminus22b);
-    glcdSetXY(r.w - 1, 100);
+    glcdSetXY(r.w - 1, 122);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     snprintf(buf, sizeof(buf), "%8" PRId32, s->position);
     glcdSetFont(&fontterminus22b);
-    glcdSetXY(r.w - 1, 125);
+    glcdSetXY(r.w - 1, 146);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     snprintf(buf, sizeof(buf), "%8" PRId32, s->queue);
     glcdSetFont(&fontterminus22b);
-    glcdSetXY(r.w - 1, 150);
+    glcdSetXY(r.w - 1, 168);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     glcdSetFont(&fontterminus22b);
     snprintf(buf, sizeof(buf), "%8" PRId32, s->speed);
-    glcdSetXY(r.w - 1, 175);
+    glcdSetXY(r.w - 1, 194);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 }

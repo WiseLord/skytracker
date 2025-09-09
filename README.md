@@ -25,6 +25,8 @@ https://www.thingiverse.com/thing:4593838 and has the following configuration:
          ┗┛
 ```
 
+# Stars
+
 Star day lasts  23h 56m 04s = 86164s. This is a time period while:
 
 - Large pinion does 1 evolution;
@@ -43,3 +45,16 @@ MCU is clocked at 72 MHz, i.e.:
 
 Number 20194687 has two good divisors 46639 * 433 good enough to configure
 hardware timer (they both belong to 1..65536 range).
+
+# Moon
+
+Moon returns to the same star after 27.322 days or 2360621 seconds. Roughly,
+it "moves" in the opposite direction than sky. So, we have a period
+
+1/x = 1/86164 - 1/2360621, from where x = 89428.2 seconds. So,
+
+307200 microsteps <=> 89428.2 * 72000000 clocks;
+1 microstep <=> 20959729 steps.
+
+Good good divisors are e.g. 8197 * 2557.
+
