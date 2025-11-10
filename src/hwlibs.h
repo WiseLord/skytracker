@@ -59,14 +59,14 @@ extern "C" {
 
 #define I2C_KS0066              I2C1
 
+#define TIM_INPUT               TIM1
+#define TIM_INPUT_HANDLER       TIM1_UP_TIM16_IRQHandler
+
 #define TIM_TRACK               TIM2
 #define TIM_TRACK_HANDLER       TIM2_IRQHandler
 
 #define TIM_STEP                TIM3
 #define TIM_STEP_HANDLER        TIM3_IRQHandler
-
-#define TIM_INPUT               TIM4
-#define TIM_INPUT_HANDLER       TIM4_IRQHandler
 
 #ifdef __cplusplus
 }

@@ -6,7 +6,11 @@ void timerInit(void *tim, uint32_t prescaler, uint32_t reload)
 {
     TIM_TypeDef *TIMx = (TIM_TypeDef *)tim;
 
-    if (TIMx == TIM2) {
+    if (TIMx == TIM1) {
+        LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
+        NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 0);
+        NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
+    } else if (TIMx == TIM2) {
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
         NVIC_SetPriority(TIM2_IRQn, 0);
         NVIC_EnableIRQ(TIM2_IRQn);
