@@ -50,9 +50,7 @@ void appInit()
     int16_t h = glcdGet()->rect.h;
 
     glcdDrawRect(0, 0, w, h, COLOR_BLACK);
-    utilmDelay(100);
     glcdSetBacklight(app.backlight);
-
 }
 
 void appRun()

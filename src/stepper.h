@@ -5,10 +5,10 @@
 #include <stdbool.h>
 
 // STEP/DIR pins
-#define STEP_Port               GPIOB
-#define STEP_Pin                LL_GPIO_PIN_10
-#define DIR_Port                GPIOB
-#define DIR_Pin                 LL_GPIO_PIN_11
+#define STEP_Port               GPIOA
+#define STEP_Pin                LL_GPIO_PIN_1
+#define DIR_Port                GPIOA
+#define DIR_Pin                 LL_GPIO_PIN_0
 
 #define EN_Port                 GPIOA
 #define EN_Pin                  LL_GPIO_PIN_4
