@@ -42,10 +42,10 @@ void stepperInit()
     GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 #endif
 
-    GPIO_InitStruct.Pin = STEP_Pin;
-    LL_GPIO_Init(STEP_Port, &GPIO_InitStruct);
-    GPIO_InitStruct.Pin = DIR_Pin;
-    LL_GPIO_Init(DIR_Port, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = STEP0_Pin;
+    LL_GPIO_Init(STEP0_Port, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = DIR0_Pin;
+    LL_GPIO_Init(DIR0_Port, &GPIO_InitStruct);
 
     GPIO_InitStruct.Pin = EN_Pin;
     LL_GPIO_Init(EN_Port, &GPIO_InitStruct);
@@ -55,8 +55,8 @@ void stepperInit()
     GPIO_InitStruct.Pin = MS2_Pin;
     LL_GPIO_Init(MS2_Port, &GPIO_InitStruct);
 
-    CLR(STEP);
-    CLR(DIR);
+    CLR(STEP0);
+    CLR(DIR0);
 
     //  MS21:   TMC2208 TMC2209
     //    00:   1/8     1/8
@@ -101,19 +101,19 @@ __attribute__((always_inline))
 static inline void doStep(int32_t speed) {
     if (speed) {
         if (speed > 0) {
-            SET(DIR);
+            SET(DIR0);
             stepper.queue--;
             stepper.position++;
         }
         if (speed < 0) {
-            CLR(DIR);
+            CLR(DIR0);
             stepper.queue++;
             stepper.position--;
         }
         // Do one step
-        SET(STEP);
+        SET(STEP0);
         utiluDelay(1);
-        CLR(STEP);
+        CLR(STEP0);
     }
 
     int32_t reload = RELOAD_MAX;
