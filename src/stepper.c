@@ -21,17 +21,18 @@ static Stepper stepper = {
     .div = DIVIDER_STAR,
     .hold = false,
     .track = false,
-    .speed = 0,
+    .motor[MOTOR_EQ].speed = 0,
+    .motor[MOTOR_RAD].speed = 0,
 };
 
 void stepperAdd(int32_t value)
 {   if (stepper.hold) {
-        stepper.target += value;
-        stepper.queue += value;
+        stepper.motor[MOTOR_EQ].target += value;
+        stepper.motor[MOTOR_EQ].queue += value;
     }
 }
 
-void stepperInit()
+void stepperInit(void)
 {
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -47,6 +48,11 @@ void stepperInit()
     GPIO_InitStruct.Pin = DIR0_Pin;
     LL_GPIO_Init(DIR0_Port, &GPIO_InitStruct);
 
+    GPIO_InitStruct.Pin = STEP1_Pin;
+    LL_GPIO_Init(STEP1_Port, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = DIR1_Pin;
+    LL_GPIO_Init(DIR1_Port, &GPIO_InitStruct);
+
     GPIO_InitStruct.Pin = EN_Pin;
     LL_GPIO_Init(EN_Port, &GPIO_InitStruct);
 
@@ -57,6 +63,9 @@ void stepperInit()
 
     CLR(STEP0);
     CLR(DIR0);
+
+    CLR(STEP1);
+    CLR(DIR1);
 
     //  MS21:   TMC2208 TMC2209
     //    00:   1/8     1/8
@@ -102,13 +111,13 @@ static inline void doStep(int32_t speed) {
     if (speed) {
         if (speed > 0) {
             SET(DIR0);
-            stepper.queue--;
-            stepper.position++;
+            stepper.motor[MOTOR_EQ].queue--;
+            stepper.motor[MOTOR_EQ].position++;
         }
         if (speed < 0) {
             CLR(DIR0);
-            stepper.queue++;
-            stepper.position--;
+            stepper.motor[MOTOR_EQ].queue++;
+            stepper.motor[MOTOR_EQ].position--;
         }
         // Do one step
         SET(STEP0);
@@ -139,35 +148,35 @@ void TIM_STEP0_HANDLER(void)
             return;
         }
 
-        if (stepper.queue == 0) {
-            if (stepper.speed <= 1 && stepper.speed >= -1) {
-                stepper.speed = 0;
+        if (stepper.motor[MOTOR_EQ].queue == 0) {
+            if (stepper.motor[MOTOR_EQ].speed <= 1 && stepper.motor[MOTOR_EQ].speed >= -1) {
+                stepper.motor[MOTOR_EQ].speed = 0;
             }
         }
-        if (stepper.queue > 0) {
-            if (stepper.speed >= stepper.queue) {
-                stepper.speed--;
+        if (stepper.motor[MOTOR_EQ].queue > 0) {
+            if (stepper.motor[MOTOR_EQ].speed >= stepper.motor[MOTOR_EQ].queue) {
+                stepper.motor[MOTOR_EQ].speed--;
             } else {
-                stepper.speed++;
+                stepper.motor[MOTOR_EQ].speed++;
             }
         }
-        if (stepper.queue < 0) {
-            if (stepper.speed <= stepper.queue) {
-                stepper.speed++;
+        if (stepper.motor[MOTOR_EQ].queue < 0) {
+            if (stepper.motor[MOTOR_EQ].speed <= stepper.motor[MOTOR_EQ].queue) {
+                stepper.motor[MOTOR_EQ].speed++;
             } else {
-                stepper.speed--;
+                stepper.motor[MOTOR_EQ].speed--;
             }
         }
 
         // Max speed limit
-        if (stepper.speed > SPEED_MAX) {
-            stepper.speed = SPEED_MAX;
+        if (stepper.motor[MOTOR_EQ].speed > SPEED_MAX) {
+            stepper.motor[MOTOR_EQ].speed = SPEED_MAX;
         }
-        if (stepper.speed < -SPEED_MAX) {
-            stepper.speed = -SPEED_MAX;
+        if (stepper.motor[MOTOR_EQ].speed < -SPEED_MAX) {
+            stepper.motor[MOTOR_EQ].speed = -SPEED_MAX;
         }
 
-        doStep(stepper.speed);
+        doStep(stepper.motor[MOTOR_EQ].speed);
     }
 }
 
@@ -199,10 +208,10 @@ void stepperHold(bool value)
 
 void stepperReset(void)
 {
-    stepper.target = 0;
-    stepper.position = 0;
-    stepper.queue = 0;
-    stepper.speed = 0;
+    stepper.motor[MOTOR_EQ].target = 0;
+    stepper.motor[MOTOR_EQ].position = 0;
+    stepper.motor[MOTOR_EQ].queue = 0;
+    stepper.motor[MOTOR_EQ].speed = 0;
 }
 
 void stepperSlowDown(bool value)

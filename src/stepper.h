@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// STEP/DIR pins
 #define STEP0_Port              GPIOA
 #define STEP0_Pin               LL_GPIO_PIN_1
 #define DIR0_Port               GPIOA
@@ -42,18 +41,32 @@ enum {
     DIVIDER_END
 };
 
+typedef uint8_t MotorType;
+enum {
+    MOTOR_BEGIN = 0,
+
+    MOTOR_EQ = MOTOR_BEGIN,
+    MOTOR_RAD,
+
+    MOTOR_END,
+};
+
 typedef struct {
     int32_t target;
     int32_t position;
     int32_t queue;
     int32_t speed;
+} Motor;
+
+typedef struct {
+    Motor motor[MOTOR_END];
     int8_t div;
     bool hold;
     bool track;
     bool slow;
 } Stepper;
 
-void stepperInit();
+void stepperInit(void);
 
 Stepper *stepperGet(void);
 

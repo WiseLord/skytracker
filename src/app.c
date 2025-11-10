@@ -287,26 +287,26 @@ void appShow()
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->target);
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].target);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w - 1, 122);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->position);
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].position);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w - 1, 146);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->queue);
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].queue);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w - 1, 168);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     glcdSetFont(&fontterminus22b);
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->speed);
+    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].speed);
     glcdSetXY(r.w - 1, 194);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
