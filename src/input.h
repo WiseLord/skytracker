@@ -17,7 +17,7 @@ extern "C" {
 #define BTN_D3                  0x0008
 #define BTN_D4                  0x0010
 #define BTN_D5                  0x0020
-#define BTN_ALL                 (BTN_D0 | BTN_D1 | BTN_D2 | BTN_D3 | BTN_D4 | BTN_D5)
+#define BTN_ALL                 (BTN_D0 | BTN_D1 | BTN_D3 | BTN_D4 | BTN_D5)
 
 #define ENC_A                   0x0040
 #define ENC_B                   0x0080
@@ -36,7 +36,7 @@ extern "C" {
 
 // Input pins are shared with display data port
 #define INPUT_Port              GPIOB
-#define INPUT_Pin               (LL_GPIO_PIN_0 | LL_GPIO_PIN_1 | LL_GPIO_PIN_2 | LL_GPIO_PIN_3 | \
+#define INPUT_Pin               (LL_GPIO_PIN_0 | LL_GPIO_PIN_1 | LL_GPIO_PIN_3 | \
                                  LL_GPIO_PIN_4 | LL_GPIO_PIN_5 | LL_GPIO_PIN_6 | LL_GPIO_PIN_7)
 
 typedef struct {
