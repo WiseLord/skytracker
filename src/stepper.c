@@ -72,7 +72,8 @@ void stepperInit()
     SET(EN);
 
     // Step period => 100us
-    timerInit(TIM_STEP, 99, 65535);
+    timerInit(TIM_STEP0, 99, 65535);
+    timerInit(TIM_STEP1, 99, 65535);
 
     // Track period 280482us
     stepperDivider(DIVIDER_STAR);
@@ -122,16 +123,16 @@ static inline void doStep(int32_t speed) {
     if (reload > RELOAD_MAX) {
         reload = RELOAD_MAX;
     }
-    LL_TIM_SetAutoReload(TIM_STEP, (uint32_t)reload);
+    LL_TIM_SetAutoReload(TIM_STEP0, (uint32_t)reload);
 }
 
-void TIM_STEP_HANDLER(void)
+void TIM_STEP0_HANDLER(void)
 {
     // int32_t direction = 0;
 
-    if (LL_TIM_IsActiveFlag_UPDATE(TIM_STEP)) {
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM_STEP0)) {
         // Clear the update interrupt flag
-        LL_TIM_ClearFlag_UPDATE(TIM_STEP);
+        LL_TIM_ClearFlag_UPDATE(TIM_STEP0);
 
         // Skip if motor not active
         if (!stepper.hold) {
@@ -170,6 +171,14 @@ void TIM_STEP_HANDLER(void)
     }
 }
 
+void TIM_STEP1_HANDLER(void)
+{
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM_STEP1)) {
+        // Clear the update interrupt flag
+        LL_TIM_ClearFlag_UPDATE(TIM_STEP1);
+    }
+}
+
 void stepperTrack(bool value)
 {
     stepper.track = value;
@@ -200,9 +209,9 @@ void stepperSlowDown(bool value)
 {
     stepper.slow = value;
     if (value) {
-        LL_TIM_SetPrescaler(TIM_STEP, 999);
+        LL_TIM_SetPrescaler(TIM_STEP0, 999);
     } else {
-        LL_TIM_SetPrescaler(TIM_STEP, 99);
+        LL_TIM_SetPrescaler(TIM_STEP0, 99);
     }
 }
 

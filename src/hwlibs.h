@@ -65,8 +65,11 @@ extern "C" {
 #define TIM_TRACK               TIM2
 #define TIM_TRACK_HANDLER       TIM2_IRQHandler
 
-#define TIM_STEP                TIM3
-#define TIM_STEP_HANDLER        TIM3_IRQHandler
+#define TIM_STEP0               TIM3
+#define TIM_STEP0_HANDLER       TIM3_IRQHandler
+
+#define TIM_STEP1               TIM4
+#define TIM_STEP1_HANDLER       TIM4_IRQHandler
 
 #ifdef __cplusplus
 }
