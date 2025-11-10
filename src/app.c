@@ -23,7 +23,7 @@ static Action action = {
 };
 
 static App app = {
-    .step = 64,
+    .step = 256,
     .backlight = true,
     .clear = true,
 };
@@ -102,16 +102,18 @@ static void actionRemapBtnShort(void)
         actionSet(ACTION_STANDBY, FLAG_SWITCH);
         break;
     case BTN_D1:
-        actionSet(ACTION_TRACK, FLAG_SWITCH);
+        // actionSet(ACTION_TRACK, FLAG_SWITCH);
+        actionSet(ACTION_ROTATE_RAD, -app.step);
         break;
     case BTN_D3:
-        actionSet(ACTION_STEP_SIZE, FLAG_SWITCH);
+        // actionSet(ACTION_STEP_SIZE, FLAG_SWITCH);
+        actionSet(ACTION_ROTATE_RAD, +app.step);
         break;
     case BTN_D4:
-        actionSet(ACTION_ROTATE, -app.step);
+        actionSet(ACTION_ROTATE_EQ, -app.step);
         break;
     case BTN_D5:
-        actionSet(ACTION_ROTATE, +app.step);
+        actionSet(ACTION_ROTATE_EQ, +app.step);
         break;
     default:
         break;
@@ -125,17 +127,19 @@ static void actionRemapBtnLong(void)
         actionSet(ACTION_BACKLIGHT, FLAG_SWITCH);
         break;
     case BTN_D1:
-        actionSet(ACTION_DIVIDER, +1);
+        // actionSet(ACTION_DIVIDER, +1);
+        actionSet(ACTION_ROTATE_RAD, -STEPS_PER_EVOLUTION * MICROSTEPS);
         break;
     case BTN_D3:
-        actionSet(ACTION_STEP_RESET, 0);
+        // actionSet(ACTION_STEP_RESET, 0);
         // actionSet(ACTION_SLOWDOWN, FLAG_SWITCH);
+        actionSet(ACTION_ROTATE_RAD, +STEPS_PER_EVOLUTION * MICROSTEPS);
         break;
     case BTN_D4:
-        actionSet(ACTION_ROTATE, -STEPS_PER_EVOLUTION * MICROSTEPS);
+        actionSet(ACTION_ROTATE_EQ, -STEPS_PER_EVOLUTION * MICROSTEPS);
         break;
     case BTN_D5:
-        actionSet(ACTION_ROTATE, +STEPS_PER_EVOLUTION * MICROSTEPS);
+        actionSet(ACTION_ROTATE_EQ, +STEPS_PER_EVOLUTION * MICROSTEPS);
         break;
     default:
         break;
@@ -146,7 +150,7 @@ static void actionRemapEncoder(void)
 {
     int16_t encCnt = action.value;
 
-    actionSet(ACTION_ROTATE, encCnt);
+    actionSet(ACTION_ROTATE_EQ, encCnt);
 }
 
 void appActionGet(void)
@@ -183,14 +187,18 @@ void appActionHandle(void)
     Stepper *s = stepperGet();
 
     switch (action.type) {
-    case ACTION_ROTATE:
-        stepperAdd(action.value);
+    case ACTION_ROTATE_EQ:
+        stepperAdd(MOTOR_EQ, action.value);
+        break;
+    case ACTION_ROTATE_RAD:
+        stepperAdd(MOTOR_RAD, action.value);
         break;
     case ACTION_TRACK:
         stepperTrack(!s->track);
         break;
     case ACTION_STEP_RESET:
-        stepperReset();
+        stepperReset(MOTOR_EQ);
+        stepperReset(MOTOR_RAD);
         break;
     case ACTION_DIVIDER:
         stepperDivider(s->div + 1);
@@ -287,26 +295,26 @@ void appShow()
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].target);
+    snprintf(buf, sizeof(buf), "%8" PRId32 "%8" PRId32, s->motor[MOTOR_EQ].target, s->motor[MOTOR_RAD].target);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w - 1, 122);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].position);
+    snprintf(buf, sizeof(buf), "%8" PRId32 "%8" PRId32, s->motor[MOTOR_EQ].position, s->motor[MOTOR_RAD].position);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w - 1, 146);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].queue);
+    snprintf(buf, sizeof(buf), "%8" PRId32 "%8" PRId32, s->motor[MOTOR_EQ].queue, s->motor[MOTOR_RAD].queue);
     glcdSetFont(&fontterminus22b);
     glcdSetXY(r.w - 1, 168);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);
 
     glcdSetFont(&fontterminus22b);
-    snprintf(buf, sizeof(buf), "%8" PRId32, s->motor[MOTOR_EQ].speed);
+    snprintf(buf, sizeof(buf), "%8" PRId32 "%8" PRId32, s->motor[MOTOR_EQ].speed, s->motor[MOTOR_RAD].speed);
     glcdSetXY(r.w - 1, 194);
     glcdSetFontAlign(GLCD_ALIGN_RIGHT);
     glcdWriteString(buf);

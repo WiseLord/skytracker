@@ -25,10 +25,10 @@ static Stepper stepper = {
     .motor[MOTOR_RAD].speed = 0,
 };
 
-void stepperAdd(int32_t value)
+void stepperAdd(MotorType motor, int32_t value)
 {   if (stepper.hold) {
-        stepper.motor[MOTOR_EQ].target += value;
-        stepper.motor[MOTOR_EQ].queue += value;
+        stepper.motor[motor].target += value;
+        stepper.motor[motor].queue += value;
     }
 }
 
@@ -101,13 +101,13 @@ void TIM_TRACK_HANDLER(void)
 
         // Callbacks
         if (stepper.hold && stepper.track) {
-            stepperAdd(+1);
+            stepperAdd(MOTOR_EQ, +1);
         }
     }
 }
 
 __attribute__((always_inline))
-static inline void doStep(int32_t speed) {
+static inline void doStep0(int32_t speed) {
     if (speed) {
         if (speed > 0) {
             SET(DIR0);
@@ -135,10 +135,37 @@ static inline void doStep(int32_t speed) {
     LL_TIM_SetAutoReload(TIM_STEP0, (uint32_t)reload);
 }
 
+__attribute__((always_inline))
+static inline void doStep1(int32_t speed) {
+    if (speed) {
+        if (speed > 0) {
+            SET(DIR1);
+            stepper.motor[MOTOR_RAD].queue--;
+            stepper.motor[MOTOR_RAD].position++;
+        }
+        if (speed < 0) {
+            CLR(DIR1);
+            stepper.motor[MOTOR_RAD].queue++;
+            stepper.motor[MOTOR_RAD].position--;
+        }
+        // Do one step
+        SET(STEP1);
+        utiluDelay(1);
+        CLR(STEP1);
+    }
+
+    int32_t reload = RELOAD_MAX;
+    if (speed) {
+        reload = 200000 / ABS(speed);
+    }
+    if (reload > RELOAD_MAX) {
+        reload = RELOAD_MAX;
+    }
+    LL_TIM_SetAutoReload(TIM_STEP1, (uint32_t)reload);
+}
+
 void TIM_STEP0_HANDLER(void)
 {
-    // int32_t direction = 0;
-
     if (LL_TIM_IsActiveFlag_UPDATE(TIM_STEP0)) {
         // Clear the update interrupt flag
         LL_TIM_ClearFlag_UPDATE(TIM_STEP0);
@@ -176,7 +203,7 @@ void TIM_STEP0_HANDLER(void)
             stepper.motor[MOTOR_EQ].speed = -SPEED_MAX;
         }
 
-        doStep(stepper.motor[MOTOR_EQ].speed);
+        doStep0(stepper.motor[MOTOR_EQ].speed);
     }
 }
 
@@ -185,6 +212,41 @@ void TIM_STEP1_HANDLER(void)
     if (LL_TIM_IsActiveFlag_UPDATE(TIM_STEP1)) {
         // Clear the update interrupt flag
         LL_TIM_ClearFlag_UPDATE(TIM_STEP1);
+
+        // Skip if motor not active
+        if (!stepper.hold) {
+            return;
+        }
+
+        if (stepper.motor[MOTOR_RAD].queue == 0) {
+            if (stepper.motor[MOTOR_RAD].speed <= 1 && stepper.motor[MOTOR_RAD].speed >= -1) {
+                stepper.motor[MOTOR_RAD].speed = 0;
+            }
+        }
+        if (stepper.motor[MOTOR_RAD].queue > 0) {
+            if (stepper.motor[MOTOR_RAD].speed >= stepper.motor[MOTOR_RAD].queue) {
+                stepper.motor[MOTOR_RAD].speed--;
+            } else {
+                stepper.motor[MOTOR_RAD].speed++;
+            }
+        }
+        if (stepper.motor[MOTOR_RAD].queue < 0) {
+            if (stepper.motor[MOTOR_RAD].speed <= stepper.motor[MOTOR_RAD].queue) {
+                stepper.motor[MOTOR_RAD].speed++;
+            } else {
+                stepper.motor[MOTOR_RAD].speed--;
+            }
+        }
+
+        // Max speed limit
+        if (stepper.motor[MOTOR_RAD].speed > SPEED_MAX) {
+            stepper.motor[MOTOR_RAD].speed = SPEED_MAX;
+        }
+        if (stepper.motor[MOTOR_RAD].speed < -SPEED_MAX) {
+            stepper.motor[MOTOR_RAD].speed = -SPEED_MAX;
+        }
+
+        doStep1(stepper.motor[MOTOR_RAD].speed);
     }
 }
 
@@ -203,15 +265,16 @@ void stepperHold(bool value)
         SET(EN);
     }
 
-    stepperReset();
+    stepperReset(MOTOR_EQ);
+    stepperReset(MOTOR_RAD);
 }
 
-void stepperReset(void)
+void stepperReset(MotorType motor)
 {
-    stepper.motor[MOTOR_EQ].target = 0;
-    stepper.motor[MOTOR_EQ].position = 0;
-    stepper.motor[MOTOR_EQ].queue = 0;
-    stepper.motor[MOTOR_EQ].speed = 0;
+    stepper.motor[motor].target = 0;
+    stepper.motor[motor].position = 0;
+    stepper.motor[motor].queue = 0;
+    stepper.motor[motor].speed = 0;
 }
 
 void stepperSlowDown(bool value)

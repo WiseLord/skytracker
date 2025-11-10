@@ -10,9 +10,9 @@
 #define DIR0_Pin                LL_GPIO_PIN_0
 
 #define STEP1_Port              GPIOA
-#define STEP1_Pin               LL_GPIO_PIN_2
+#define STEP1_Pin               LL_GPIO_PIN_3
 #define DIR1_Port               GPIOA
-#define DIR1_Pin                LL_GPIO_PIN_3
+#define DIR1_Pin                LL_GPIO_PIN_2
 
 #define EN_Port                 GPIOA
 #define EN_Pin                  LL_GPIO_PIN_4
@@ -70,8 +70,8 @@ void stepperInit(void);
 
 Stepper *stepperGet(void);
 
-void stepperAdd(int32_t value);
-void stepperReset(void);
+void stepperAdd(MotorType motor, int32_t value);
+void stepperReset(MotorType motor);
 void stepperDivider(DividerType div);
 const char *stepperDividerName(void);
 void stepperTrack(bool value);
