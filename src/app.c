@@ -124,7 +124,8 @@ static void actionRemapBtnLong(void)
 {
     switch (action.value) {
     case BTN_D0:
-        actionSet(ACTION_BACKLIGHT, FLAG_SWITCH);
+        // actionSet(ACTION_BACKLIGHT, FLAG_SWITCH);
+        actionSet(ACTION_TRACK, FLAG_SWITCH);
         break;
     case BTN_D1:
         // actionSet(ACTION_DIVIDER, +1);

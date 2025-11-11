@@ -9,12 +9,12 @@
 #define MIN(x, y)       ((x) < (y) ? (x) : (y))
 
 #define RELOAD_MAX          65535
-#define SPEED_MAX           2000
+#define SPEED_MAX           1000
 #define USTEPS_PER_SEC_MAX  100
 
 static const Divider dividers[DIVIDER_END] = {
-    [DIVIDER_STAR] = {46638, 432, " звёзды"},  // 72MHz / 46639 / 433 = 3.565294 Hz
-    [DIVIDER_MOON] = {8196, 2556, "   Луна"},
+    [DIVIDER_STAR] = {21540, 3749, " звёзды"},  // 72MHz / 21541 / 3750 = 0.891 Hz
+    [DIVIDER_MOON] = {21006, 3990, "   Луна"},  // 72MHz / 21006 / 3990 = 0.859 Hz
 };
 
 static Stepper stepper = {
@@ -80,9 +80,9 @@ void stepperInit(void)
     // Turn off motors
     SET(EN);
 
-    // Step period => 100us
-    timerInit(TIM_STEP0, 99, 65535);
-    timerInit(TIM_STEP1, 99, 65535);
+    // Step period => 200us
+    timerInit(TIM_STEP0, 199, 65535);
+    timerInit(TIM_STEP1, 199, 65535);
 
     // Track period 280482us
     stepperDivider(DIVIDER_STAR);
